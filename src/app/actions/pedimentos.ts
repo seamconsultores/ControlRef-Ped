@@ -8,6 +8,9 @@ import { revalidatePath } from 'next/cache';
 export async function createPedimento(formData: PedimentoFormData, userId: string = '00000000-0000-0000-0000-000000000000') {
     const supabase = await createClient();
     try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const activeUserId = session?.user?.id || null;
+
         const year = new Date().getFullYear().toString().slice(-2);
 
         // 1. Obtener Consecutivo de REFERENCIA (Por Aduana, indistintamente de Patente)
@@ -62,6 +65,9 @@ export async function createPedimento(formData: PedimentoFormData, userId: strin
 
         const numero_pedimento = `${year}-${formData.aduana}-${formData.patente}-${bloqueConsecutivo}`;
 
+        // Standardize client name
+        const clienteStand = formData.cliente.trim().toUpperCase();
+
         // 4. Insertar Pedimento (o simular)
         if (!isSimulation) {
             const { error: insertError } = await supabase
@@ -71,18 +77,26 @@ export async function createPedimento(formData: PedimentoFormData, userId: strin
                     aduana: formData.aduana,
                     patente: formData.patente,
                     numero_pedimento,
-                    cliente: formData.cliente,
-                    proveedor: formData.proveedor,
+                    cliente: clienteStand,
+                    proveedor: formData.proveedor.trim().toUpperCase(),
                     tipo_operacion: formData.tipo_operacion,
                     clave_pedimento: formData.clave_pedimento,
                     caja: formData.caja,
                     placas: formData.placas,
                     es_inbond: formData.es_inbond,
-                    usuario_id: userId,
+                    usuario_id: activeUserId,
                     estado: 'BORRADOR'
                 });
 
             if (insertError) throw new Error(`Error insertando pedimento: ${insertError.message}`);
+
+            // 5. Upsert into Clientes Catalog
+            if (activeUserId) {
+                await supabase.from('clientes').insert({
+                    nombre_razon_social: clienteStand,
+                    created_by: activeUserId
+                }); // Si ya existe, fallará silenciosamente según PG o ignorará el error
+            }
         }
 
         revalidatePath('/pedimentos/historial');

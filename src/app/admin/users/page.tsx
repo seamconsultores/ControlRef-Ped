@@ -96,8 +96,8 @@ export default function AdminUsers() {
             password: '', // Password empty by default on edit
             fullName: user.full_name || '',
             role: user.role,
-            aduanas: user.aduana_access || [],
-            patentes: user.patente_access || []
+            aduanas: user.access_aduanas || [],
+            patentes: user.access_patentes || []
         });
         setMessage(null);
         // Scroll to top or form
@@ -436,8 +436,8 @@ export default function AdminUsers() {
                                                 {/* ADUANAS LIST */}
                                                 <td className="px-8 py-4">
                                                     <div className="flex flex-wrap gap-1 max-w-[150px]">
-                                                        {user.aduana_access && Array.isArray(user.aduana_access) && user.aduana_access.length > 0
-                                                            ? user.aduana_access.map((ad: string) => (
+                                                        {user.access_aduanas && Array.isArray(user.access_aduanas) && user.access_aduanas.length > 0
+                                                            ? user.access_aduanas.map((ad: string) => (
                                                                 <span key={ad} className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded border border-slate-200">
                                                                     {ad}
                                                                 </span>
@@ -450,8 +450,8 @@ export default function AdminUsers() {
                                                 {/* PATENTES LIST */}
                                                 <td className="px-8 py-4">
                                                     <div className="flex flex-wrap gap-1 max-w-[150px]">
-                                                        {user.patente_access && Array.isArray(user.patente_access) && user.patente_access.length > 0
-                                                            ? user.patente_access.map((pat: string) => (
+                                                        {user.access_patentes && Array.isArray(user.access_patentes) && user.access_patentes.length > 0
+                                                            ? user.access_patentes.map((pat: string) => (
                                                                 <span key={pat} className="px-1.5 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-bold rounded border border-amber-100">
                                                                     {pat}
                                                                 </span>

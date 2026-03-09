@@ -45,10 +45,12 @@ export default function HistorialPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
     const [userRole, setUserRole] = useState('user');
+    const [profilesMap, setProfilesMap] = useState<Record<string, string>>({});
 
     useEffect(() => {
         const storedRole = localStorage.getItem('userRole');
         if (storedRole) setUserRole(storedRole);
+        fetchProfiles();
         fetchPedimentos();
     }, []);
 
@@ -56,6 +58,18 @@ export default function HistorialPage() {
         localStorage.removeItem('userRole');
         localStorage.removeItem('sessionContext');
         router.push('/');
+    };
+
+    const fetchProfiles = async () => {
+        // Fetch users to map UUIDs to their real names
+        const { data, error } = await supabase.from('profiles').select('id, full_name, role');
+        if (!error && data) {
+            const map: Record<string, string> = {};
+            data.forEach((p: any) => {
+                map[p.id] = p.full_name || 'Desconocido';
+            });
+            setProfilesMap(map);
+        }
     };
 
     const fetchPedimentos = async () => {
@@ -187,8 +201,8 @@ export default function HistorialPage() {
                                                         minute: '2-digit'
                                                     }) : 'N/A'}
                                                 </div>
-                                                <div className="text-[10px] uppercase font-bold text-slate-400 mt-1" title={ped.usuario_id}>
-                                                    Usuario: {ped.usuario_id ? ped.usuario_id.slice(0, 8) : 'N/A'}...
+                                                <div className="text-[10px] uppercase font-bold text-slate-400 mt-1" title={ped.usuario_id || 'Sistema'}>
+                                                    Usuario: {ped.usuario_id ? (profilesMap[ped.usuario_id] || ped.usuario_id.slice(0, 8)) : 'SISTEMA'}
                                                 </div>
                                             </td>
                                         </tr>

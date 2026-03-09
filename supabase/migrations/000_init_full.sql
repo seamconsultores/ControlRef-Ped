@@ -1,8 +1,22 @@
 -- 000_init_full.sql
--- Consolidated Schema for Clean Reset
--- Run this in Supabase SQL Editor after dropping all tables
+-- Consolidated Schema for Clean Reset (Including DROPS)
+-- WARNING: THIS DELETES ALL DATA AND TABLES
 
--- Enable UUID extension
+-- DROP EVERYTHING FIRST
+DO $$ DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+        EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
+    END LOOP;
+END $$;
+
+-- Drop Functions
+DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
+DROP FUNCTION IF EXISTS public.assign_next_seal_v2() CASCADE;
+DROP FUNCTION IF EXISTS public.uuid_generate_v4() CASCADE;
+
+-- Re-Enable UUID extension
 create extension if not exists "uuid-ossp";
 
 -- 1. PROFILES (Users)
@@ -12,6 +26,7 @@ create table public.profiles (
   role text default 'operativo', -- 'admin', 'director', 'gerente', 'coordinador', 'operativo'
   first_name text,
   last_name text,
+  full_name text generated always as (first_name || ' ' || last_name) stored, -- Added to fix 400 error
   aduana text default '240', -- Default context
   patente text default '3834', -- Default context
   -- Access Control Arrays
@@ -57,6 +72,7 @@ create table public.noticias (
   link_url text, -- Read More / Source link
   fuente text, -- 'DOF', 'SAT', 'Internal'
   fecha_publicacion timestamptz default now(),
+  created_at timestamptz default now(), -- Added for ordering
   created_by uuid references public.profiles(id),
   active boolean default true
 );
@@ -88,6 +104,7 @@ create table public.sellos_fiscales (
   fecha_asignacion timestamptz,
   cliente text,
   pedimento text, -- Main pedimento
+  referencia text, -- New Column for Reports
   pedimento_refs text[], -- All pedimentos
   aduana text, -- Aduana where it was used
   caja text,
@@ -96,6 +113,17 @@ create table public.sellos_fiscales (
   fecha_creacion timestamptz default now(),
   created_by uuid references auth.users(id)
 );
+
+-- 3.1 CONSECUTIVOS (For serial numbers)
+create table public.consecutivos (
+  id uuid default uuid_generate_v4() primary key,
+  tabla text not null unique, -- 'sellos', 'pedimentos'
+  valor bigint default 0,
+  updated_at timestamptz default now()
+);
+alter table public.consecutivos enable row level security;
+create policy "Consecutivos readable" on consecutivos for select using (true);
+create policy "Consecutivos writable" on consecutivos for all using (true);
 
 -- Indexes
 create index idx_sellos_serie on sellos_fiscales(numero_serie);
@@ -117,6 +145,7 @@ create or replace function assign_next_seal_v2(
   p_patente text,
   p_cliente text,
   p_pedimento text,
+  p_referencia text,
   p_aduana text,
   p_caja text,
   p_placas text,
@@ -159,6 +188,7 @@ begin
     fecha_asignacion = now(),
     cliente = p_cliente,
     pedimento = p_pedimento,
+    referencia = p_referencia,
     aduana = p_aduana,
     caja = p_caja,
     placas = p_placas,

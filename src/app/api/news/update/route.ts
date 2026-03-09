@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 
@@ -27,16 +27,20 @@ const TARGET_URL = 'https://dof.gob.mx/index.php';
 export async function GET() {
     console.log('📡 Iniciando actualización de noticias DOF...');
 
-    // Hack para SSL del DOF si falla (opcional, usar con cuidado en prod)
-    if (process.env.NODE_ENV === 'development') {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    }
-
     try {
-        const supabase = await createClient();
+        // Usar permisos de Administrador para que el Servidor pueda registrar las noticias sin bloqueo RLS.
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+        const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
 
         // 1. Fetch HTML
+        const https = require('https');
+        const agent = new https.Agent({  
+          rejectUnauthorized: false
+        });
+
         const response = await axios.get(TARGET_URL, {
+            httpsAgent: agent,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -74,7 +78,9 @@ export async function GET() {
 
             const newsData = {
                 source: 'DOF',
+                fuente: 'DOF',        // Para la tabla antigua
                 title: item.title,
+                titulo: item.title,   // Para evitar el constraint NOT NULL
                 date_str: new Date().toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }),
                 category: textToSearch.includes('fiscal') ? 'fiscal' : 'operativo',
                 color_class: textToSearch.includes('fiscal') ? 'bg-emerald-700' : 'bg-blue-600',
@@ -83,7 +89,7 @@ export async function GET() {
             };
 
             // Check duplicate
-            const { data: existing } = await supabase
+            const { data: existing } = await supabaseAdmin
                 .from('noticias')
                 .select('id')
                 .eq('title', newsData.title)
@@ -92,12 +98,12 @@ export async function GET() {
             if (existing) {
                 // Update link if needed
                 if (item.link) {
-                    await supabase.from('noticias').update({ link: item.link }).eq('id', existing.id);
+                    await supabaseAdmin.from('noticias').update({ link: item.link }).eq('id', existing.id);
                 }
                 skipCount++;
             } else {
                 // Insert
-                await supabase.from('noticias').insert([newsData]);
+                await supabaseAdmin.from('noticias').insert([newsData]);
                 newCount++;
             }
         }

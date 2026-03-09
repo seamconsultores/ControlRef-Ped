@@ -53,16 +53,16 @@ const Sidebar = ({ userRole = 'user', onLogout }: { userRole?: string, onLogout?
 
         const { data: profile } = await supabase
             .from('profiles')
-            .select('aduana_access')
+            .select('access_aduanas')
             .eq('id', user.id)
             .single();
 
-        if (profile?.aduana_access) {
+        if (profile?.access_aduanas) {
             let aduanas: string[] = [];
-            if (Array.isArray(profile.aduana_access)) {
-                aduanas = profile.aduana_access;
-            } else if (typeof profile.aduana_access === 'string') {
-                try { aduanas = JSON.parse(profile.aduana_access); } catch (e) { }
+            if (Array.isArray(profile.access_aduanas)) {
+                aduanas = profile.access_aduanas;
+            } else if (typeof profile.access_aduanas === 'string') {
+                try { aduanas = JSON.parse(profile.access_aduanas); } catch (e) { }
             }
             setContexts(aduanas);
         }
@@ -102,9 +102,11 @@ const Sidebar = ({ userRole = 'user', onLogout }: { userRole?: string, onLogout?
         { icon: FileText, label: 'Historial', href: '/pedimentos/historial', roles: ['admin', 'user', 'operativo', 'gerente', 'director', 'coordinador'] },
         { icon: FileText, label: 'Excel Historico', href: '/pedimentos/historico', roles: ['admin', 'director', 'gerente', 'coordinador'] },
         { icon: ShieldCheck, label: 'Control de Sellos', href: '/sellos', roles: ['admin', 'director', 'gerente', 'coordinador', 'operativo'] },
+        { icon: FileText, label: 'Hist. de Sellos', href: '/sellos/historial', roles: ['admin', 'director', 'gerente', 'coordinador', 'operativo'] },
         { icon: BarChart3, label: 'Generador de Reportes', href: '/reportes', roles: ['admin', 'director', 'gerente'] },
         { icon: BarChart3, label: 'Estadísticas', href: '/estadisticas', roles: ['admin', 'director', 'gerente'] },
         { icon: Building2, label: 'Aduanas/Patentes', href: '/configuracion/aduanas', roles: ['admin', 'director'] },
+        { icon: Users, label: 'Catálogo de Clientes', href: '/configuracion/clientes', roles: ['admin', 'director', 'gerente', 'coordinador'] },
         { icon: Users, label: 'Usuarios', href: '/admin/users', roles: ['admin', 'director'] },
     ];
 

@@ -24,6 +24,20 @@ export default function PedimentoForm({ initialAduana, initialPatente }: { initi
     const [successData, setSuccessData] = useState<{ referencia: string, numero_pedimento: string } | null>(null);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
+    const [clientesList, setClientesList] = useState<string[]>([]);
+    
+    React.useEffect(() => {
+        const fetchClientes = async () => {
+            const { createClient } = await import('@/lib/supabase/client');
+            const supabase = createClient();
+            const { data } = await supabase.from('clientes').select('nombre_razon_social').order('nombre_razon_social');
+            if (data) {
+                setClientesList(data.map((c: any) => c.nombre_razon_social));
+            }
+        };
+        fetchClientes();
+    }, []);
+
     // Sync state with props if they change (e.g. context switch in header)
     React.useEffect(() => {
         setFormData(prev => ({
@@ -213,8 +227,15 @@ export default function PedimentoForm({ initialAduana, initialPatente }: { initi
                             placeholder="Razón Social del Cliente"
                             value={formData.cliente}
                             onChange={handleInputChange}
+                            list="clientes_list_pedimento"
+                            autoComplete="off"
                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-700 placeholder:text-slate-400"
                         />
+                        <datalist id="clientes_list_pedimento">
+                            {clientesList.map((c, i) => (
+                                <option key={i} value={c} />
+                            ))}
+                        </datalist>
                     </div>
 
                     <div className="space-y-2">

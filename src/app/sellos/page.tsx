@@ -39,6 +39,18 @@ export default function SellosPage() {
     const [newSealUbicacion, setNewSealUbicacion] = useState('Bodega'); // Default Bodega
     const [adding, setAdding] = useState(false);
 
+    const [clientesList, setClientesList] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fetchClientes = async () => {
+            const { data } = await supabase.from('clientes').select('nombre_razon_social').order('nombre_razon_social');
+            if (data) {
+                setClientesList(data.map((c: any) => c.nombre_razon_social));
+            }
+        };
+        fetchClientes();
+    }, []);
+
     useEffect(() => {
         fetchUserAndSeals();
     }, []);
@@ -162,6 +174,14 @@ export default function SellosPage() {
 
                     if (!updateError && updatedSeal) {
                         assignedSealData = updatedSeal;
+                        
+                        // Upsert client into catalogue automatically
+                        const clienteStand = formData.cliente.trim().toUpperCase();
+                        await supabase.from('clientes').insert({
+                            nombre_razon_social: clienteStand,
+                            created_by: user.id
+                        }); // Fallará silenciosamente si ya existe, logrando el ON CONFLICT DO NOTHING
+                        
                     } else {
                         // Collision occurred, wait a bit and retry
                         await new Promise(res => setTimeout(res, Math.random() * 200 + 100)); // 100-300ms delay
@@ -522,8 +542,15 @@ export default function SellosPage() {
                                                 className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#244635]/20"
                                                 placeholder="Nombre del Cliente"
                                                 value={formData.cliente}
+                                                list="clientes_list_sellos"
+                                                autoComplete="off"
                                                 onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
                                             />
+                                            <datalist id="clientes_list_sellos">
+                                                {clientesList.map((c, i) => (
+                                                    <option key={i} value={c} />
+                                                ))}
+                                            </datalist>
                                         </div>
 
                                         <div>

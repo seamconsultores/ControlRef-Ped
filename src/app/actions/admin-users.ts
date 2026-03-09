@@ -81,15 +81,20 @@ export async function createUser(formData: FormData) {
         if (userData.user) {
             // 2. Insert Profile Manually (The "Nuclear Option")
             // This replaces the need for the trigger.
+            const nameParts = fullName.trim().split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+
             const { error: profileError } = await supabaseAdmin
                 .from('profiles')
-                .insert({
+                .upsert({
                     id: userData.user.id,
                     email: email,
-                    full_name: fullName,
+                    first_name: firstName,
+                    last_name: lastName,
                     role: role,
-                    aduana_access: aduanaArray,
-                    patente_access: patenteArray
+                    access_aduanas: aduanaArray,
+                    access_patentes: patenteArray
                 });
 
             if (profileError) {
@@ -155,8 +160,8 @@ export async function updateUser(formData: FormData) {
         user_metadata: {
             full_name: fullName,
             role: role,
-            aduana_access: aduanaArray,
-            patente_access: patenteArray
+            access_aduanas: aduanaArray,
+            access_patentes: patenteArray
         }
     };
     if (password && password.trim().length > 0) {
@@ -177,13 +182,18 @@ export async function updateUser(formData: FormData) {
     // Let's use standard client with RLS (Role 'admin' can update).
 
     // NOTE: Arrays in FormData might need clearer handling, but here we have them parsed.
-    const { error: dbError } = await (await supabase)
+    const nameParts = fullName.trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    const { error: dbError } = await supabaseAdmin
         .from('profiles')
         .update({
-            full_name: fullName,
+            first_name: firstName,
+            last_name: lastName,
             role: role,
-            aduana_access: aduanaArray,
-            patente_access: patenteArray,
+            access_aduanas: aduanaArray,
+            access_patentes: patenteArray,
             updated_at: new Date().toISOString()
         })
         .eq('id', userId);

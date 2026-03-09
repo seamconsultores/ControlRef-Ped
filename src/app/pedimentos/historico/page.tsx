@@ -26,7 +26,7 @@ export default function HistoricoExcelPage() {
         setLoading(true);
         setErrorMsg('');
         try {
-            let query = supabase.from('pedimentos_historicos').select('*').order('created_at', { ascending: false }).limit(200);
+            let query = supabase.from('pedimentos_historicos').select('*').limit(200);
 
             if (searchTerm) {
                 query = query.or(`referencia.ilike.%${searchTerm}%,pedimento.ilike.%${searchTerm}%,cliente.ilike.%${searchTerm}%`);

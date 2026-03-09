@@ -8,7 +8,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function inspectProfiles() {
     const { data: profiles, error } = await supabase
         .from('profiles')
-        .select('email, role, aduana_access, patente_access')
+        .select('email, role, access_aduanas, access_patentes')
         .limit(5);
 
     if (error) {
@@ -19,10 +19,10 @@ async function inspectProfiles() {
     console.log("Profiles Data Inspection:");
     profiles.forEach(p => {
         console.log(`User: ${p.email} (${p.role})`);
-        console.log(`- Aduana Access Type: ${typeof p.aduana_access}`);
-        console.log(`- Aduana Access Value:`, p.aduana_access);
-        console.log(`- Patente Access Type: ${typeof p.patente_access}`);
-        console.log(`- Patente Access Value:`, p.patente_access);
+        console.log(`- Aduana Access Type: ${typeof p.access_aduanas}`);
+        console.log(`- Aduana Access Value:`, p.access_aduanas);
+        console.log(`- Patente Access Type: ${typeof p.access_patentes}`);
+        console.log(`- Patente Access Value:`, p.access_patentes);
         console.log("---------------------------------------------------");
     });
 }
