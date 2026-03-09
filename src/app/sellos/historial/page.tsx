@@ -67,6 +67,16 @@ export default function HistorialSellosPage() {
                 .not('fecha_asignacion', 'is', null)
                 .order('fecha_asignacion', { ascending: false });
 
+            // Recuperar contexto (Patente / Aduana) para filtrar historial
+            const storedContext = localStorage.getItem('sessionContext');
+            if (storedContext) {
+                try {
+                    const ctx = JSON.parse(storedContext);
+                    if (ctx.aduana) query = query.eq('aduana_id', ctx.aduana);
+                    if (ctx.patente) query = query.eq('patente', ctx.patente);
+                } catch (e) { console.error('Error parsing sessionContext', e); }
+            }
+
             if (searchTerm) {
                 query = query.or(`numero_serie.ilike.%${searchTerm}%,cliente.ilike.%${searchTerm}%,pedimento.ilike.%${searchTerm}%,referencia.ilike.%${searchTerm}%,caja.ilike.%${searchTerm}%`);
             }

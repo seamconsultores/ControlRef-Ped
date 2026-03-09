@@ -79,6 +79,16 @@ export default function HistorialPage() {
             // Build query
             let query = supabase.from('pedimentos').select('*').order('fecha_creacion', { ascending: false });
 
+            // Recuperar contexto (Patente / Aduana) para filtrar historial
+            const storedContext = localStorage.getItem('sessionContext');
+            if (storedContext) {
+                try {
+                    const ctx = JSON.parse(storedContext);
+                    if (ctx.aduana) query = query.eq('aduana', ctx.aduana);
+                    if (ctx.patente) query = query.eq('patente', ctx.patente);
+                } catch (e) { console.error('Error parsing sessionContext', e); }
+            }
+
             if (searchTerm) {
                 // Simple OR search across multiple fields
                 query = query.or(`referencia.ilike.%${searchTerm}%,numero_pedimento.ilike.%${searchTerm}%,cliente.ilike.%${searchTerm}%`);
