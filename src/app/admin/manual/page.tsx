@@ -45,8 +45,10 @@ export default function ManualPage() {
     }
 
     return (
-        <div className="min-h-screen pl-64 bg-[#f8fafc]">
-            <Sidebar userRole={userRole} />
+        <div className="min-h-screen pl-64 print:pl-0 print:bg-white bg-[#f8fafc]">
+            <div className="print:hidden">
+                <Sidebar userRole={userRole} />
+            </div>
 
             <header className="h-24 bg-white px-8 flex items-center justify-between sticky top-0 z-10 shadow-sm/50 print:hidden">
                 <div className="flex items-center gap-4">
@@ -72,7 +74,7 @@ export default function ManualPage() {
             {/* Print Styles */}
             <style jsx global>{`
                 @media print {
-                    @page { margin: 15mm; size: A4; }
+                    @page { margin: 1cm; size: A4; }
                     body { background: white; -webkit-print-color-adjust: exact; color-adjust: exact; }
                     .print\\:hidden { display: none !important; }
                     .print\\:break-before { page-break-before: always; }
