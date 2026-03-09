@@ -12,7 +12,8 @@ import {
     LogOut,
     PlusCircle,
     Building2,
-    ShieldCheck
+    ShieldCheck,
+    BookOpen
 } from 'lucide-react';
 import ConnectionStatus from './ConnectionStatus';
 import { createClient } from '@/lib/supabase/client';
@@ -109,6 +110,7 @@ const Sidebar = ({ userRole = 'user', onLogout }: { userRole?: string, onLogout?
         { icon: ShieldCheck, label: 'Series (Sociedades)', href: '/configuracion/series', roles: ['admin', 'director', 'gerente', 'coordinador'] },
         { icon: Users, label: 'Catálogo de Clientes', href: '/configuracion/clientes', roles: ['admin', 'director', 'gerente', 'coordinador'] },
         { icon: Users, label: 'Usuarios', href: '/admin/users', roles: ['admin', 'director'] },
+        { icon: BookOpen, label: 'Manual Corporativo', href: '/admin/manual', roles: ['admin'] },
     ];
 
     const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));
