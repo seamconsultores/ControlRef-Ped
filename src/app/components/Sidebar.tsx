@@ -106,6 +106,7 @@ const Sidebar = ({ userRole = 'user', onLogout }: { userRole?: string, onLogout?
         { icon: BarChart3, label: 'Generador de Reportes', href: '/reportes', roles: ['admin', 'director', 'gerente'] },
         { icon: BarChart3, label: 'Estadísticas', href: '/estadisticas', roles: ['admin', 'director', 'gerente'] },
         { icon: Building2, label: 'Aduanas/Patentes', href: '/configuracion/aduanas', roles: ['admin', 'director'] },
+        { icon: ShieldCheck, label: 'Series (Sociedades)', href: '/configuracion/series', roles: ['admin', 'director', 'gerente', 'coordinador'] },
         { icon: Users, label: 'Catálogo de Clientes', href: '/configuracion/clientes', roles: ['admin', 'director', 'gerente', 'coordinador'] },
         { icon: Users, label: 'Usuarios', href: '/admin/users', roles: ['admin', 'director'] },
     ];

@@ -26,8 +26,14 @@ export default function ClientesPage() {
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        const storedRole = localStorage.getItem('userRole');
-        if (storedRole) setUserRole(storedRole);
+        const fetchUserContext = async () => {
+             const { data: { session } } = await supabase.auth.getSession();
+             if (session) {
+                 const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
+                 if (profile) setUserRole(profile.role);
+             }
+        };
+        fetchUserContext();
         fetchClientes();
     }, []);
 
