@@ -13,7 +13,9 @@ import {
     PlusCircle,
     Building2,
     ShieldCheck,
-    BookOpen
+    BookOpen,
+    Database,
+    Cpu
 } from 'lucide-react';
 import ConnectionStatus from './ConnectionStatus';
 import { createClient } from '@/lib/supabase/client';
@@ -110,7 +112,9 @@ const Sidebar = ({ userRole = 'user', onLogout }: { userRole?: string, onLogout?
         { icon: ShieldCheck, label: 'Series (Sociedades)', href: '/configuracion/series', roles: ['admin', 'director', 'gerente', 'coordinador'] },
         { icon: Users, label: 'Catálogo de Clientes', href: '/configuracion/clientes', roles: ['admin', 'director', 'gerente', 'coordinador'] },
         { icon: Users, label: 'Usuarios', href: '/admin/users', roles: ['admin', 'director'] },
-        { icon: BookOpen, label: 'Manual Corporativo', href: '/admin/manual', roles: ['admin'] },
+        { icon: BookOpen, label: 'Manual de Operación', href: '/admin/manual', roles: ['admin'] },
+        { icon: Cpu, label: 'Manual Técnico', href: '/admin/technical-manual', roles: ['admin'] },
+        { icon: Database, label: 'Centro de Respaldos', href: '/admin/backup', roles: ['admin', 'director'] },
     ];
 
     const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));

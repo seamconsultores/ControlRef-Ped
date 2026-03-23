@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Sidebar from '@/app/components/Sidebar';
 import { 
-    Printer, AlertCircle, BookOpen, GitMerge, ShieldAlert, CheckCircle2, UserCog,
+    Printer, AlertCircle, BookOpen, GitMerge, ShieldAlert, CheckCircle2, UserCog, Clock,
     LayoutDashboard, FileText, Stamp, Play, Users, GitBranch, Key, XCircle, FileStack
 } from 'lucide-react';
 
@@ -254,6 +254,45 @@ export default function ManualPage() {
                                 </div>
                             </li>
                         </ul>
+                    </section>
+
+                    {/* ---------- SECCIÓN 5: RESILIENCIA Y RECUPERACIÓN ---------- */}
+                    <section className="space-y-6">
+                        <div className="flex items-center gap-3 border-b border-slate-200 pb-2">
+                            <ShieldAlert className="text-red-700" size={28} />
+                            <h2 className="text-2xl font-black text-[#244635] tracking-tight uppercase">5. Resiliencia y Recuperación de Datos</h2>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="border border-red-100 bg-red-50/30 p-4 rounded-xl">
+                                <h4 className="font-bold text-red-900 flex items-center gap-2 mb-2">
+                                    <Clock size={18} /> Respaldo Automático (Supabase)
+                                </h4>
+                                <p className="text-xs font-medium text-red-800/80">
+                                    La base de datos realiza respaldos diarios automáticos. En caso de siniestro o corrupción masiva, el administrador puede restaurar la instancia a su estado funcional más reciente desde el panel de Supabase.
+                                </p>
+                            </div>
+                            <div className="border border-slate-100 bg-slate-50/50 p-4 rounded-xl">
+                                <h4 className="font-bold text-[#244635] flex items-center gap-2 mb-2">
+                                    <GitBranch size={18} /> Estructura como Código
+                                </h4>
+                                <p className="text-xs font-medium text-slate-600">
+                                    Todo el esquema (tablas, RLS, políticas) reside en archivos SQL dentro del repositorio Git. Esto permite reconstruir la plataforma completa en una nueva infraestructura en minutos.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-xl">
+                            <h4 className="font-bold text-yellow-900 text-sm uppercase mb-2 flex items-center gap-2">
+                                <Key size={16} /> Protocolo de Contingencia Ante Ataque
+                            </h4>
+                            <ol className="list-decimal list-inside text-xs font-medium text-yellow-800 space-y-2">
+                                <li><strong>Rotación de Llaves:</strong> Cambiar inmediatamente la <code>SUPABASE_SERVICE_ROLE_KEY</code> y Secrets de Auth.</li>
+                                <li><strong>Cierre de Sesiones:</strong> Forzar el cierre de todas las sesiones activas de usuarios desde el tablero de control.</li>
+                                <li><strong>Auditoría de Logs:</strong> Revisar la bitácora de auditoría (`audit logs`) para identificar el punto de entrada.</li>
+                                <li><strong>Restauración:</strong> Aplicar el respaldo de las últimas 24 horas si la integridad de los datos fue comprometida.</li>
+                            </ol>
+                        </div>
                     </section>
 
                     <div className="print:break-before"></div>
